@@ -39,8 +39,8 @@
                 <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Input.IsAdminUser"></label>
-                <input asp-for="Input.IsAdminUser" class="form-control" />
+                <input asp-for="Input.IsAdminUser" class="form-check-input" />
+                <label asp-for="Input.IsAdminUser" class="form-check-label"></label>
                 <span asp-validation-for="Input.IsAdminUser" class="text-danger"></span>
             </div>
             <button type="submit" class="btn btn-primary">Register</button>

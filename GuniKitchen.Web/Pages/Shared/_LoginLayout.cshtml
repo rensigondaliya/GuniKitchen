@@ -13,6 +13,14 @@
     <link rel="stylesheet" href="~/css/bootsnav.css">
     <link rel="stylesheet" href="~/css/color.css">
     <link rel="stylesheet" href="~/css/custom.css" />
+    <style>
+        body {
+            color: #454646;
+        }
+        footer {
+            color: #fff;
+        }
+    </style>
 
     <!--[if lt IE 9]>
             <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -40,7 +48,7 @@
     <!--End Preloader -->
 
     <!-- Navbar -->
-    <nav class="navbar navbar-default bootsnav no-background navbar-fixed black">
+    <nav class="navbar navbar-default bootsnav black">
         <div class="container">  
 
             <!-- Start Atribute Navigation -->
@@ -86,16 +94,12 @@
         <!-- End Side Menu -->
     </nav>
 
-
-    <main role="main">
-        @RenderBody()
-    </main>
-
-    <!-- Lock -->
-    <section id="lock">
-        <h2>SERVING MORE THAN JUST BURGERS AND PIZZA SINCE 2010</h2>
-        <p class="mt-2">Check out our opening hours and location address below.</p>
-    </section>
+    <div class="container">
+        <main role="main">
+            @RenderBody()
+        </main>
+        <br />
+    </div>
 
     <!-- Footer -->
     <footer>
