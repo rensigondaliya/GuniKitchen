@@ -61,6 +61,24 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            #region Additional Properties as defined in MyIdentityUser Model
+
+            [Display(Name = "Display Name")]
+            [Required(ErrorMessage = "{0} cannot be empty.")]
+            [MinLength(2, ErrorMessage = "{0} should have at least {1} characters.")]
+            [StringLength(60, ErrorMessage = "{0} cannot have more than {1} characters.")]
+            public string DisplayName { get; set; }
+
+            [Display(Name = "Date of Birth")]
+            [Required]
+            public DateTime DateOfBirth { get; set; }
+
+            [Display(Name = "Is Admin User?")]
+            [Required]
+            public bool IsAdminUser { get; set; }
+
+            #endregion
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -75,7 +93,13 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new MyIdentityUser { UserName = Input.Email, Email = Input.Email };
+                var user = new MyIdentityUser { 
+                    UserName = Input.Email, 
+                    Email = Input.Email,
+                    DisplayName = Input.DisplayName,
+                    DateOfBirth = Input.DateOfBirth,
+                    IsAdminUser = Input.IsAdminUser
+                };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

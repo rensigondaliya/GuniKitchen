@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using GuniKitchen.Web.Data;
 using GuniKitchen.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,13 +15,16 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<MyIdentityUser> _userManager;
         private readonly SignInManager<MyIdentityUser> _signInManager;
+        private readonly ApplicationDbContext _dbContext;
 
         public IndexModel(
             UserManager<MyIdentityUser> userManager,
-            SignInManager<MyIdentityUser> signInManager)
+            SignInManager<MyIdentityUser> signInManager,
+            ApplicationDbContext dbContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _dbContext = dbContext;
         }
 
         public string Username { get; set; }
@@ -36,6 +40,24 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            #region Additional Properties as defined in MyIdentityUser Model
+
+            [Display(Name = "Display Name")]
+            [Required(ErrorMessage = "{0} cannot be empty.")]
+            [MinLength(2, ErrorMessage = "{0} should have at least {1} characters.")]
+            [StringLength(60, ErrorMessage = "{0} cannot have more than {1} characters.")]
+            public string DisplayName { get; set; }
+
+            [Display(Name = "Date of Birth")]
+            [Required]
+            public DateTime DateOfBirth { get; set; }
+
+            [Display(Name = "Is Admin User?")]
+            [Required]
+            public bool IsAdminUser { get; set; }
+
+            #endregion
         }
 
         private async Task LoadAsync(MyIdentityUser user)
@@ -47,7 +69,10 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                DisplayName = user.DisplayName,
+                DateOfBirth = user.DateOfBirth,
+                IsAdminUser = user.IsAdminUser
             };
         }
 
@@ -88,8 +113,27 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            bool hasChangedDisplayName = false;
+            if (Input.DisplayName != user.DisplayName)
+            {
+                user.DisplayName = Input.DisplayName;
+                hasChangedDisplayName = true;
+            }
+
+            bool hasChangedDateOfBirth = false;
+            if (Input.DateOfBirth != user.DateOfBirth)
+            {
+                user.DateOfBirth = Input.DateOfBirth;
+                hasChangedDateOfBirth = true;
+            }
+
+            if(hasChangedDisplayName || hasChangedDateOfBirth)
+            {
+                _dbContext.SaveChanges();
+            }
+
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            StatusMessage = "Your profile has been updated successfully!";
             return RedirectToPage();
         }
     }
