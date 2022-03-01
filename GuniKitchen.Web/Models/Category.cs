@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -39,6 +40,14 @@ namespace GuniKitchen.Web.Models
         /// </remarks>
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
+
+
+
+        #region Navigational Properties to the Product Model
+
+        public ICollection<Product> Products { get; set; }
+
+        #endregion
 
     }
 }
