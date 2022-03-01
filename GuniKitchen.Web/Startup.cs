@@ -1,4 +1,5 @@
 using GuniKitchen.Web.Data;
+using GuniKitchen.Web.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -17,24 +18,66 @@ namespace GuniKitchen.Web
 {
     public class Startup
     {
+        public IConfiguration _configuration { get; }
+
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services
+                .AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(
+                        _configuration.GetConnectionString("DefaultConnection")));
+
+            services
+                .AddDatabaseDeveloperPageExceptionFilter();
+
+
+            //-- Replacing the default ASP.NET Identity configuration with the Customized one.
+            //services
+            //    .AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Configure customized ASP.NET Identity OWIN middleware.
+            services
+                .AddIdentity<MyIdentityUser, MyIdentityRole>(options =>
+                {
+                    // Sign-In Policy
+                    options.SignIn.RequireConfirmedAccount = true;
+
+                    // Password Policy
+                    options.Password.RequireUppercase = true;
+                    options.Password.RequireLowercase = true;
+                    options.Password.RequireDigit = true;
+                    options.Password.RequireNonAlphanumeric = true;
+                    options.Password.RequiredLength = 8;
+
+                    // User Policy
+                    options.User.RequireUniqueEmail = true;
+                })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            // Configure the Identity Application Level Cookie
+            services
+                .ConfigureApplicationCookie(options =>
+                {
+                    options.LoginPath = "/Identity/Account/Login";
+                    options.LogoutPath = "/Identity/Account/Logout";
+                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+                    options.SlidingExpiration = true;
+                });
+
             services.AddRazorPages();
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -42,11 +85,13 @@ namespace GuniKitchen.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
                 app.UseMigrationsEndPoint();
             }
             else
             {
                 app.UseExceptionHandler("/Error");
+
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -62,6 +107,16 @@ namespace GuniKitchen.Web
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+
+                // Register the Route for Areas
+                endpoints.MapControllerRoute(
+                    name: "areas",
+                    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+                // Register the Default Route
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller}/{action=Index}/{id?}");
             });
         }
     }
