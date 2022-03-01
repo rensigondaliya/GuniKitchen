@@ -10,6 +10,7 @@ namespace GuniKitchen.Web.Data
         : IdentityDbContext<MyIdentityUser, MyIdentityRole, Guid>
     {
         public DbSet<Category> Category { get; set; }
+        public DbSet<Product> Product { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
