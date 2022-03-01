@@ -25,7 +25,7 @@ namespace GuniKitchen.Web.Models
         public string ProductDescription { get; set; }
 
 
-        [Display(Name = "Price per unit (in Rupees)")]
+        [Display(Name = "Price per unit")]
         [Required]
         [Range(0.0, 500.00, ErrorMessage = "{0} has to be between Rs. {1} and Rs. {2}")]
         public decimal Price { get; set; }
@@ -43,7 +43,6 @@ namespace GuniKitchen.Web.Models
         ///     This is mapped to an enumeration of Sizes
         /// </remarks>
         [Display(Name = "Size")]
-        [StringLength(20, ErrorMessage = "{0} cannot have more than {1} characters.")]
         [Column(TypeName = "varchar(20)")]
         public ProductSizes Size { get; set; }
 
