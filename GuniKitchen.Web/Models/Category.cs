@@ -38,6 +38,7 @@ namespace GuniKitchen.Web.Models
         ///     However, to ensure that this is handled correctly, set the default value 
         ///     in the ApplicationDbContext class during the "OnModelCreating" method.
         /// </remarks>
+        [Display(Name = "Created at")]
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; }
 
