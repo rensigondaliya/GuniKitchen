@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GuniKitchen.Web.Data;
 using GuniKitchen.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GuniKitchen.Web.Areas.Manage.Controllers
 {
@@ -59,6 +60,14 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
         {
             if (ModelState.IsValid)
             {
+                
+                bool found = _context.Category.Any(e => e.CategoryName == category.CategoryName);
+                if (found)
+                {
+                    ModelState.AddModelError("CategoryName", "Duplicate Category Found!");
+                    return View(category);
+                }
+
                 _context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -96,6 +105,14 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
 
             if (ModelState.IsValid)
             {
+                bool found = _context.Category.Any(e => 
+                    e.CategoryId != category.CategoryId && e.CategoryName == category.CategoryName);
+                if (found)
+                {
+                    ModelState.AddModelError("CategoryName", "Duplicate Category Found!");
+                    return View(category);
+                }
+
                 try
                 {
                     _context.Update(category);

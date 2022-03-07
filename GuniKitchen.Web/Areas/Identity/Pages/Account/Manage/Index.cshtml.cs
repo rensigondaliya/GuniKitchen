@@ -60,16 +60,13 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
             #endregion
         }
 
-        private async Task LoadAsync(MyIdentityUser user)
+        private void LoadUserData(MyIdentityUser user)
         {
-            var userName = await _userManager.GetUserNameAsync(user);
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-
-            Username = userName;
+            Username = user.UserName;
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber,
+                PhoneNumber = user.PhoneNumber,
                 DisplayName = user.DisplayName,
                 DateOfBirth = user.DateOfBirth,
                 IsAdminUser = user.IsAdminUser
@@ -79,12 +76,13 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            await LoadAsync(user);
+            LoadUserData(user);
             return Page();
         }
 
@@ -98,7 +96,7 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
 
             if (!ModelState.IsValid)
             {
-                await LoadAsync(user);
+                LoadUserData(user);
                 return Page();
             }
 

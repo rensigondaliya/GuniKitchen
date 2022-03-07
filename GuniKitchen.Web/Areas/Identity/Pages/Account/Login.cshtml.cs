@@ -22,7 +22,8 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
         private readonly SignInManager<MyIdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<MyIdentityUser> signInManager, 
+        public LoginModel(
+            SignInManager<MyIdentityUser> signInManager, 
             ILogger<LoginModel> logger,
             UserManager<MyIdentityUser> userManager)
         {
