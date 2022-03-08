@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GuniKitchen.Web.Data;
 using GuniKitchen.Web.Models;
+using GuniKitchen.Web.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -57,6 +58,12 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
             [Required]
             public bool IsAdminUser { get; set; }
 
+            // NOTE: Assign ID for each of the radio buttons,
+            //       as browser needs unique "id", to avoid browser warnings
+            [Required(ErrorMessage = "Please indicate which of these best describes your Gender.")]
+            [Display(Name = "Gender")]
+            public MyIdentityGenders Gender { get; set; }
+
             #endregion
         }
 
@@ -69,7 +76,8 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
                 PhoneNumber = user.PhoneNumber,
                 DisplayName = user.DisplayName,
                 DateOfBirth = user.DateOfBirth,
-                IsAdminUser = user.IsAdminUser
+                IsAdminUser = user.IsAdminUser,
+                Gender = user.Gender
             };
         }
 
@@ -100,38 +108,51 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
+            bool hasChangedPhoneNumber = false;
+            if (Input.PhoneNumber != user.PhoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
+                if (setPhoneResult.Succeeded)
                 {
+                    hasChangedPhoneNumber = true;
+                }
+                else 
+                { 
                     StatusMessage = "Unexpected error when trying to set phone number.";
                     return RedirectToPage();
                 }
             }
 
-            bool hasChangedDisplayName = false;
+            bool hasOtherChanges = false;
+
             if (Input.DisplayName != user.DisplayName)
             {
                 user.DisplayName = Input.DisplayName;
-                hasChangedDisplayName = true;
+                hasOtherChanges = true;
             }
 
-            bool hasChangedDateOfBirth = false;
             if (Input.DateOfBirth != user.DateOfBirth)
             {
                 user.DateOfBirth = Input.DateOfBirth;
-                hasChangedDateOfBirth = true;
+                hasOtherChanges = true;
             }
 
-            if(hasChangedDisplayName || hasChangedDateOfBirth)
+            if (Input.Gender != user.Gender)
+            {
+                user.Gender = Input.Gender;
+                hasOtherChanges = true;
+            }
+
+            if (hasChangedPhoneNumber || hasOtherChanges)
             {
                 _dbContext.SaveChanges();
+                this.StatusMessage = "Your profile has been updated successfully!";
+                await _signInManager.RefreshSignInAsync(user);
             }
-
-            await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated successfully!";
+            else
+            {
+                this.StatusMessage = "Error: No changes to update.";
+            }
             return RedirectToPage();
         }
     }

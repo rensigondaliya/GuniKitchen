@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using GuniKitchen.Web.Models.Enums;
 
 namespace GuniKitchen.Web.Areas.Identity.Pages.Account
 {
@@ -78,6 +79,12 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
             [Required]
             public bool IsAdminUser { get; set; }
 
+            // NOTE: Assign ID for each of the radio buttons,
+            //       as browser needs unique "id", to avoid browser warnings
+            [Required(ErrorMessage = "Please indicate which of these best describes your Gender.")]
+            [Display(Name = "Gender")]
+            public MyIdentityGenders Gender { get; set; }
+
             #endregion
         }
 
@@ -98,7 +105,8 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
                     Email = Input.Email,
                     DisplayName = Input.DisplayName,
                     DateOfBirth = Input.DateOfBirth,
-                    IsAdminUser = Input.IsAdminUser
+                    IsAdminUser = Input.IsAdminUser,
+                    Gender = Input.Gender
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)

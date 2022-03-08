@@ -21,21 +21,27 @@ namespace GuniKitchen.Web
     public class Startup
     {
         public IConfiguration _configuration { get; }
+        public readonly IHostEnvironment _hostEnvironment;
 
 
-        public Startup(IConfiguration configuration)
+        public Startup(
+            IConfiguration configuration,
+            IHostEnvironment hostEnvironment)
         {
             _configuration = configuration;
+            _hostEnvironment = hostEnvironment;
         }
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connectionStringName = _hostEnvironment.IsDevelopment() ? "DefaultConnection" : "AzureConnection";
+
             services
                 .AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(
-                        _configuration.GetConnectionString("DefaultConnection")));
+                        _configuration.GetConnectionString(connectionStringName)));
 
             services
                 .AddDatabaseDeveloperPageExceptionFilter();

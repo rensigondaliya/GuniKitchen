@@ -1,4 +1,5 @@
 ﻿@page
+@using GuniKitchen.Web.Models.Enums
 @model RegisterModel
 @{
     ViewData["Title"] = "Register";
@@ -42,6 +43,31 @@
                 <input asp-for="Input.IsAdminUser" class="form-check-input" />
                 <label asp-for="Input.IsAdminUser" class="form-check-label"></label>
                 <span asp-validation-for="Input.IsAdminUser" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Gender" class="control-label-required"></label>
+                <br />
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary">
+                        <input asp-for="Input.Gender" type="radio" class="form-check-input"
+                               id="Input.Gender.Male" name="Input.Gender"
+                               value="@MyIdentityGenders.Male" />
+                        Male
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input asp-for="Input.Gender" type="radio" class="form-check-input"
+                               id="Input.Gender.Female" name="Input.Gender"
+                               value="@MyIdentityGenders.Female" />
+                        Female
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input asp-for="Input.Gender" type="radio" class="form-check-input"
+                               id="Input.Gender.ThirdGender" name="Input.Gender"
+                               value="@MyIdentityGenders.ThirdGender" />
+                        Third Gender
+                    </label>
+                </div>
+                <span asp-validation-for="Input.Gender" class="text-danger" style="display: block;"></span>
             </div>
             <button type="submit" class="btn btn-primary">Register</button>
         </form>
