@@ -1,0 +1,39 @@
+﻿@using GuniKitchen.Web.Models;
+@inject SignInManager<MyIdentityUser> SignInManager
+@inject UserManager<MyIdentityUser> _userManager
+
+@{
+    var user = await _userManager.GetUserAsync(User);
+}
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User) && user != null)
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @user.DisplayName!</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Manage" asp-controller="Categories" asp-action="Index">Manage Categories</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Manage" asp-controller="Products" asp-action="Index">Manage Products</a>
+    </li>
+    <li class="nav-item">
+        <form class="form-inline" 
+             asp-area="Identity" asp-page="/Account/Logout" 
+             method="post" >
+            <button type="submit" class="nav-link btn btn-primary">Logout</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+    </li>
+}
+
+</ul>
