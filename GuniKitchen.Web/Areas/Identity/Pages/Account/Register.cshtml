@@ -8,7 +8,7 @@
 <h1>@ViewData["Title"]</h1>
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
         <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h4>Create a new account.</h4>
             <hr />
@@ -40,9 +40,13 @@
                 <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input asp-for="Input.IsAdminUser" class="form-check-input" />
-                <label asp-for="Input.IsAdminUser" class="form-check-label"></label>
-                <span asp-validation-for="Input.IsAdminUser" class="text-danger"></span>
+                <div class="checkbox">
+                    <label asp-for="Input.IsAdminUser">
+                        <input asp-for="Input.IsAdminUser" />
+                        @Html.DisplayNameFor(m => m.Input.IsAdminUser)
+                    </label>
+                    <span asp-validation-for="Input.IsAdminUser" class="text-danger"></span>
+                </div>
             </div>
             <div class="form-group">
                 <label asp-for="Input.Gender" class="control-label-required"></label>
@@ -72,7 +76,7 @@
             <button type="submit" class="btn btn-primary">Register</button>
         </form>
     </div>
-    <div class="col-md-6 col-md-offset-2">
+    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
         <section>
             <h4>Use another service to register.</h4>
             <hr />
