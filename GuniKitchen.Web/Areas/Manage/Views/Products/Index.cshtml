@@ -1,65 +1,37 @@
 ﻿@model IEnumerable<GuniKitchen.Web.Models.Product>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "List of Products";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-sm btn-outline-primary" asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductDescription)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UnitOfMeasure)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Size)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UnitOfMeasure)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Size)
-            </td>
-            <td>
+
+
+<div class="card-columns">
+    @foreach (var item in Model)
+    {
+        <div class="card bg-light">
+            <div class="font-weight-bold text-center" 
+                 style="border-bottom: 2px dashed #ccc; width: 80%; margin: 0 auto; padding:10px;">
                 @Html.DisplayFor(modelItem => item.Category.CategoryName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ProductId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ProductId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProductId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+            </div>
+            <div style="max-width:390px;">
+                <img src="@item.ProductImageFileUrl" class="img-fluid rounded card-img-top" />
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">@Html.DisplayFor(modelItem => item.ProductName)</h4>
+                <p class="card-text">@Html.DisplayFor(modelItem => item.ProductDescription)</p>
+                <h5 class="card-text text-center">@item.Price.ToString("$ 0.00")</h5>
+            </div>
+            <div class="card-footer text-right">
+                <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.ProductId">Edit</a> 
+                <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.ProductId">Details</a> 
+                <a class="btn btn-sm btn-outline-primary" asp-action="Delete" asp-route-id="@item.ProductId">Delete</a>
+            </div>
+        </div>
+    }
+</div>

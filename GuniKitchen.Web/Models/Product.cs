@@ -48,6 +48,12 @@ namespace GuniKitchen.Web.Models
         public ProductSizes Size { get; set; }
 
 
+        [StringLength(150)]
+        public string ProductImageFileUrl { get; set; }
+
+        [StringLength(60)]
+        public string ProductImageContentType { get; set; }
+
         #region Navigational Properties to the Category Model
 
         [ForeignKey(nameof(Product.Category))]

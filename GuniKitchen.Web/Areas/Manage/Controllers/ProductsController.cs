@@ -1,35 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Azure.Storage.Blobs;
+using GuniKitchen.Web.Areas.Manage.ViewModels;
+using GuniKitchen.Web.Data;
+using GuniKitchen.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using GuniKitchen.Web.Data;
-using GuniKitchen.Web.Models;
-using GuniKitchen.Web.Areas.Manage.ViewModels;
-using Microsoft.AspNetCore.Http;
-using System.IO;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Azure.Storage.Blobs;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 
 namespace GuniKitchen.Web.Areas.Manage.Controllers
 {
     [Area("Manage")]
     public class ProductsController : Controller
     {
+        private const string BlobContainerNAME = "productimages";
+
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _environment;
         private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(
             ApplicationDbContext context,
             IConfiguration config,
+            IWebHostEnvironment environment,
             ILogger<ProductsController> logger)
         {
             _context = context;
             _config = config;
+            _environment = environment;
             _logger = logger;
         }
 
@@ -74,18 +79,26 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
         public async Task<IActionResult> Create(
             [Bind("ProductId,ProductName,ProductDescription,Price,UnitOfMeasure,Size,CategoryId,Photo")] ProductViewModel productViewModel)
         {
-
             if (ModelState.IsValid)
             {
+                string photoUrl = null;
+                if (productViewModel.Photo != null)
+                {
+                    // Upload the product image to the Blob Storage Account.
+                    photoUrl = await SavePhotoToBlobAsync(productViewModel.Photo);
+                }
+
                 Product newProduct = new Product
                 {
                     ProductId = productViewModel.ProductId,
+                    CategoryId = productViewModel.CategoryId,
                     ProductName = productViewModel.ProductName,
                     ProductDescription = productViewModel.ProductDescription,
                     Price = productViewModel.Price,
                     UnitOfMeasure = productViewModel.UnitOfMeasure,
                     Size = productViewModel.Size,
-                    CategoryId = productViewModel.CategoryId
+                    ProductImageFileUrl = photoUrl,
+                    ProductImageContentType = photoUrl == null ? null : productViewModel.Photo.ContentType
                 };
                 _context.Add(newProduct);
                 await _context.SaveChangesAsync();
@@ -109,8 +122,19 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryName", product.CategoryId);
-            return View(product);
+            var productViewModel = new ProductViewModel
+            {
+                ProductId = product.ProductId,
+                CategoryId = product.CategoryId,
+                ProductName = product.ProductName,
+                ProductDescription = product.ProductDescription,
+                Price = product.Price,
+                UnitOfMeasure = product.UnitOfMeasure,
+                Size = product.Size
+            };
+            ViewBag.ProductImageFileUrl = product.ProductImageFileUrl;
+            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryName", productViewModel.CategoryId);
+            return View(productViewModel);
         }
 
         // POST: Manage/Products/Edit/5
@@ -118,15 +142,33 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductName,ProductDescription,Price,UnitOfMeasure,Size,CategoryId")] Product product)
+        public async Task<IActionResult> Edit(int id, 
+            [Bind("ProductId,ProductName,ProductDescription,Price,UnitOfMeasure,Size,CategoryId,Photo")] ProductViewModel productViewModel)
         {
-            if (id != product.ProductId)
+            if (id != productViewModel.ProductId)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
+                string photoUrl = null;
+                if (productViewModel.Photo != null)
+                {
+                    // Upload the product image to the Blob Storage Account.
+                    photoUrl = await SavePhotoToBlobAsync(productViewModel.Photo);
+                }
+
+                var product = _context.Products.FirstOrDefault(p => p.ProductId == productViewModel.ProductId);
+                product.CategoryId = productViewModel.CategoryId;
+                product.ProductName = productViewModel.ProductName;
+                product.ProductDescription = productViewModel.ProductDescription;
+                product.Price = productViewModel.Price;
+                product.UnitOfMeasure = productViewModel.UnitOfMeasure;
+                product.Size = productViewModel.Size;
+                product.ProductImageFileUrl = photoUrl;
+                product.ProductImageContentType = photoUrl == null ? null : productViewModel.Photo.ContentType;
+
                 try
                 {
                     _context.Update(product);
@@ -145,8 +187,8 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryName", product.CategoryId);
-            return View(product);
+            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryName", productViewModel.CategoryId);
+            return View(productViewModel);
         }
 
         // GET: Manage/Products/Delete/5
@@ -186,40 +228,43 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
 
         private async Task<string> SavePhotoToBlobAsync(IFormFile productImage)
         {
-            //if (this.Request.Form.Files.Count >= 0)
-            //{
-            //    IFormFile file = this.Request.Form.Files.FirstOrDefault();
-            //    using (var dataStream = new MemoryStream())
-            //    {
-            //        await file.CopyToAsync(dataStream);
-            //        productViewModel.Photo = dataStream.ToArray();
-            //    }
-            //}
-            //else
-            //{
-            //    ModelState.AddModelError("Photo", "Please select an image file to upload.");
-            //}
-
-            string photoUrl = string.Empty;
             string storageConnection1 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey1");
             string storageConnection2 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey2");
-            string blobContainerName = "productimages";
-
-            BlobServiceClient blobServiceClient = new BlobServiceClient(storageConnection1);
-            BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnection1, blobContainerName);
-            await blobContainerClient.CreateIfNotExistsAsync(Azure.Storage.Blobs.Models.PublicAccessType.BlobContainer);
-
             string fileName = productImage.FileName;
             string fileType = productImage.ContentType;
-            byte[] file;
-            using (var dataStream = new MemoryStream())
+            string filepath = string.Empty;
+            string photoUrl = string.Empty;
+
+            if (productImage != null && productImage.Length > 0)
             {
-                await productImage.CopyToAsync(dataStream);
-                file = dataStream.ToArray();
+                // Save the uploaded file on to a TEMP file.
+                filepath = Path.GetTempFileName();
+                using (var stream = System.IO.File.Create(filepath))
+                {
+                    productImage.CopyToAsync(stream).Wait();
+                }
             }
 
+            // Get a reference to a container 
+            BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnection1, BlobContainerNAME);
+
+            // Create the container if it does not exist - granting PUBLIC access.
+            await blobContainerClient.CreateIfNotExistsAsync(Azure.Storage.Blobs.Models.PublicAccessType.BlobContainer);
+
+            // Create the client to the Blob Item
             BlobClient blobClient = blobContainerClient.GetBlobClient(fileName);
-            // await blobClient.UploadAsync();
+
+            // Open the file and upload its data
+            using (FileStream uploadFileStream = System.IO.File.OpenRead(filepath))
+            {
+                await blobClient.UploadAsync(uploadFileStream, overwrite: true);
+                uploadFileStream.Close();
+            }
+
+            // Delete the TEMP file since it is no longer needed.
+            System.IO.File.Delete(filepath);
+
+            // Return the URI of the item in the Blob Storage
             photoUrl = blobClient.Uri.ToString();
             return photoUrl;
         }
