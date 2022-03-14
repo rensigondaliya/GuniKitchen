@@ -36,8 +36,8 @@ namespace GuniKitchen.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connectionStringName 
-                = _hostEnvironment.IsDevelopment() ? "DefaultConnection" : "AzureConnection";
+            string connectionStringName
+                = _hostEnvironment.IsDevelopment() || _hostEnvironment.IsStaging() ? "DefaultConnection" : "AzureConnection";
 
             services
                 .AddDbContext<ApplicationDbContext>(options =>
