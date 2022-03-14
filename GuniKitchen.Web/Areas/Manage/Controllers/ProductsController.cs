@@ -7,6 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GuniKitchen.Web.Data;
 using GuniKitchen.Web.Models;
+using GuniKitchen.Web.Areas.Manage.ViewModels;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Azure.Storage.Blobs;
 
 namespace GuniKitchen.Web.Areas.Manage.Controllers
 {
@@ -14,10 +20,17 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _config;
+        private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(
+            ApplicationDbContext context,
+            IConfiguration config,
+            ILogger<ProductsController> logger)
         {
             _context = context;
+            _config = config;
+            _logger = logger;
         }
 
         // GET: Manage/Products
@@ -58,16 +71,29 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,ProductName,ProductDescription,Price,UnitOfMeasure,Size,CategoryId")] Product product)
+        public async Task<IActionResult> Create(
+            [Bind("ProductId,ProductName,ProductDescription,Price,UnitOfMeasure,Size,CategoryId,Photo")] ProductViewModel productViewModel)
         {
+
             if (ModelState.IsValid)
             {
-                _context.Add(product);
+                Product newProduct = new Product
+                {
+                    ProductId = productViewModel.ProductId,
+                    ProductName = productViewModel.ProductName,
+                    ProductDescription = productViewModel.ProductDescription,
+                    Price = productViewModel.Price,
+                    UnitOfMeasure = productViewModel.UnitOfMeasure,
+                    Size = productViewModel.Size,
+                    CategoryId = productViewModel.CategoryId
+                };
+                _context.Add(newProduct);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryName", product.CategoryId);
-            return View(product);
+            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryName", productViewModel.CategoryId);
+            return View(productViewModel);
         }
 
         // GET: Manage/Products/Edit/5
@@ -156,6 +182,46 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
         private bool ProductExists(int id)
         {
             return _context.Products.Any(e => e.ProductId == id);
+        }
+
+        private async Task<string> SavePhotoToBlobAsync(IFormFile productImage)
+        {
+            //if (this.Request.Form.Files.Count >= 0)
+            //{
+            //    IFormFile file = this.Request.Form.Files.FirstOrDefault();
+            //    using (var dataStream = new MemoryStream())
+            //    {
+            //        await file.CopyToAsync(dataStream);
+            //        productViewModel.Photo = dataStream.ToArray();
+            //    }
+            //}
+            //else
+            //{
+            //    ModelState.AddModelError("Photo", "Please select an image file to upload.");
+            //}
+
+            string photoUrl = string.Empty;
+            string storageConnection1 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey1");
+            string storageConnection2 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey2");
+            string blobContainerName = "productimages";
+
+            BlobServiceClient blobServiceClient = new BlobServiceClient(storageConnection1);
+            BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnection1, blobContainerName);
+            await blobContainerClient.CreateIfNotExistsAsync(Azure.Storage.Blobs.Models.PublicAccessType.BlobContainer);
+
+            string fileName = productImage.FileName;
+            string fileType = productImage.ContentType;
+            byte[] file;
+            using (var dataStream = new MemoryStream())
+            {
+                await productImage.CopyToAsync(dataStream);
+                file = dataStream.ToArray();
+            }
+
+            BlobClient blobClient = blobContainerClient.GetBlobClient(fileName);
+            // await blobClient.UploadAsync();
+            photoUrl = blobClient.Uri.ToString();
+            return photoUrl;
         }
     }
 }

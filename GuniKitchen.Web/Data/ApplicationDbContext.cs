@@ -1,4 +1,5 @@
 ﻿using GuniKitchen.Web.Models;
+using GuniKitchen.Web.Models.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

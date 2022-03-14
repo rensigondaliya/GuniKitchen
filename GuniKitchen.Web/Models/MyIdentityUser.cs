@@ -28,6 +28,7 @@ namespace GuniKitchen.Web.Models
         [Required]
         public bool IsAdminUser { get; set; }
 
+
         [Required]
         [Display(Name = "Gender")]
         [PersonalData]

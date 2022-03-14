@@ -1,17 +1,17 @@
-﻿using GuniKitchen.Web.Models.Enums;
+﻿using GuniKitchen.Web.Models;
+using GuniKitchen.Web.Models.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GuniKitchen.Web.Models
+namespace GuniKitchen.Web.Areas.Manage.ViewModels
 {
-    [Table("Products")]
-    public class Product
+    public class ProductViewModel
     {
 
         [Display(Name = "ID of the Product")]
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductId { get; set; }
 
 
@@ -32,9 +32,14 @@ namespace GuniKitchen.Web.Models
         public decimal Price { get; set; }
 
 
-        [Required]
         [Display(Name = "Unit of Measure")]
+        [Required]
         public string UnitOfMeasure { get; set; }
+
+
+        [Display(Name = "Product Image")]
+        [Required(ErrorMessage = "Please select an image file to upload.")] 
+        public IFormFile Photo { get; set; }
 
 
         /// <summary>
@@ -50,7 +55,7 @@ namespace GuniKitchen.Web.Models
 
         #region Navigational Properties to the Category Model
 
-        [ForeignKey(nameof(Product.Category))]
+        [ForeignKey(nameof(ProductViewModel.Category))]
         public short CategoryId { get; set; }
 
         public Category Category { get; set; }

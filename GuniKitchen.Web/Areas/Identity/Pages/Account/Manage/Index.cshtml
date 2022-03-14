@@ -47,6 +47,7 @@
                            checked="@(item == Model?.Input.Gender)" />
                     <label asp-for="Input.Gender">@item</label>
                 }
+                <span asp-validation-for="Input.Gender" class="text-danger" style="display: block"></span>
             </div>
 
             <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>

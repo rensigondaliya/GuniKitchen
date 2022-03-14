@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace GuniKitchen.Web.Models
+namespace GuniKitchen.Web.Models.Enums
 {
     public enum ProductSizes
     {
