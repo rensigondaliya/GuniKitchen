@@ -18,18 +18,20 @@ using GuniKitchen.Web.Models.Enums;
 
 namespace GuniKitchen.Web.Areas.Identity.Pages.Account
 {
-    [AllowAnonymous]
-    public class RegisterModel : PageModel
+    [Authorize(Roles = "Administrator")]
+    public class RegisterManagerModel : PageModel
     {
+        private const string StandardPassword = "Password!123";
+
         private readonly SignInManager<MyIdentityUser> _signInManager;
         private readonly UserManager<MyIdentityUser> _userManager;
-        private readonly ILogger<RegisterModel> _logger;
+        private readonly ILogger<RegisterManagerModel> _logger;
         private readonly IEmailSender _emailSender;
 
-        public RegisterModel(
+        public RegisterManagerModel(
             UserManager<MyIdentityUser> userManager,
             SignInManager<MyIdentityUser> signInManager,
-            ILogger<RegisterModel> logger,
+            ILogger<RegisterManagerModel> logger,
             IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -52,17 +54,6 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-
             #region Additional Properties as defined in MyIdentityUser Model
 
             [Display(Name = "Display Name")]
@@ -74,10 +65,6 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
             [Display(Name = "Date of Birth")]
             [Required]
             public DateTime DateOfBirth { get; set; }
-
-            [Display(Name = "Is Admin User?")]
-            [Required]
-            public bool IsAdminUser { get; set; } = false;
 
             // NOTE: Assign ID for each of the radio buttons,
             //       as browser needs unique "id", to avoid browser warnings
@@ -96,7 +83,8 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= Url.Content("~/Manage/Users");
+
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
@@ -105,18 +93,18 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
                     Email = Input.Email,
                     DisplayName = Input.DisplayName,
                     DateOfBirth = Input.DateOfBirth,
-                    IsAdminUser = Input.IsAdminUser,                // Initialized to FALSE for "Customer" User
+                    IsAdminUser = true,
                     Gender = Input.Gender
                 };
-                var result = await _userManager.CreateAsync(user, Input.Password);
+                var result = await _userManager.CreateAsync(user, StandardPassword);
                 if (result.Succeeded)
                 {
-                    // Assign the user to the "Customer" Identity Role
+                    // Assign the user to the "Manager" Identity Role
                     await _userManager.AddToRolesAsync(user, new string[] {
-                        MyIdentityRoleNames.Customer.ToString()
+                        MyIdentityRoleNames.Manager.ToString()
                     });
 
-                    _logger.LogInformation("User created a new CUSTOMER account with password.");
+                    _logger.LogInformation("User created a new MANAGER account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -135,7 +123,7 @@ namespace GuniKitchen.Web.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        // await _signInManager.SignInAsync(user, isPersistent: false);
                         return LocalRedirect(returnUrl);
                     }
                 }

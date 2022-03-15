@@ -1,4 +1,5 @@
 ﻿@using GuniKitchen.Web.Models;
+@using GuniKitchen.Web.Models.Enums;
 @inject SignInManager<MyIdentityUser> SignInManager
 @inject UserManager<MyIdentityUser> _userManager
 
@@ -7,33 +8,48 @@
 }
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User) && user != null)
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @user.DisplayName!</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Manage" asp-controller="Categories" asp-action="Index">Manage Categories</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Manage" asp-controller="Products" asp-action="Index">Manage Products</a>
-    </li>
-    <li class="nav-item">
-        <form class="form-inline" 
-             asp-area="Identity" asp-page="/Account/Logout" 
-             method="post" >
-            <button type="submit" class="nav-link btn btn-primary">Logout</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
+    @if (SignInManager.IsSignedIn(User) && user != null)
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @user.DisplayName!</a>
+        </li>
+
+        @if (await _userManager.IsInRoleAsync(user, MyIdentityRoleNames.Administrator.ToString()))
+        {
+            <li>
+                <a class="nav-link text-dark" asp-area="Manage" asp-controller="Users" asp-action="Index">Users</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="Manage" asp-controller="Categories" asp-action="Index">Categories</a>
+            </li>
+        }
+
+        @if (await _userManager.IsInRoleAsync(user, MyIdentityRoleNames.Administrator.ToString())
+             || await _userManager.IsInRoleAsync(user, MyIdentityRoleNames.Manager.ToString()))
+        {
+
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="Manage" asp-controller="Products" asp-action="Index">Products</a>
+            </li>
+        }
+
+        <li class="nav-item">
+            <form class="form-inline"
+              asp-area="Identity" asp-page="/Account/Logout"
+              method="post">
+                <button type="submit" class="nav-link btn btn-primary">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
 
 </ul>

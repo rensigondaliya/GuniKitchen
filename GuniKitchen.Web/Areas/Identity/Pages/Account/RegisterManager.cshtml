@@ -1,8 +1,8 @@
 ﻿@page
 @using GuniKitchen.Web.Models.Enums
-@model RegisterModel
+@model RegisterManagerModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Register Manager";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -18,16 +18,6 @@
                 <input asp-for="Input.Email" class="form-control" />
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Input.Password"></label>
-                <input asp-for="Input.Password" class="form-control" />
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Input.ConfirmPassword"></label>
-                <input asp-for="Input.ConfirmPassword" class="form-control" />
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
             <hr />
             <div class="form-group">
                 <label asp-for="Input.DisplayName"></label>
@@ -39,17 +29,6 @@
                 <input asp-for="Input.DateOfBirth" class="form-control" />
                 <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
             </div>
-            @*
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label asp-for="Input.IsAdminUser">
-                            <input asp-for="Input.IsAdminUser" />
-                            @Html.DisplayNameFor(m => m.Input.IsAdminUser)
-                        </label>
-                        <span asp-validation-for="Input.IsAdminUser" class="text-danger"></span>
-                    </div>
-                </div>
-            *@
             <div class="form-group">
                 <label asp-for="Input.Gender" class="control-label-required"></label>
                 <br />
@@ -75,38 +54,8 @@
                 </div>
                 <span asp-validation-for="Input.Gender" class="text-danger" style="display: block;"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary">Register Manager</button>
         </form>
-    </div>
-    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-        <section>
-            <h4>Use another service to register.</h4>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
-                            for details on setting up this ASP.NET application to support logging in via external services.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
     </div>
 </div>
 

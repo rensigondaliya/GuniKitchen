@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
+using GuniKitchen.Web.Areas.Manage.ViewModels;
 
 namespace GuniKitchen.Web.Data
 {
@@ -46,5 +47,6 @@ namespace GuniKitchen.Web.Data
                    .Property(e => e.Size)
                    .HasConversion(sizeConverter);
         }
+
     }
 }
