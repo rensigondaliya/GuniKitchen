@@ -157,7 +157,7 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
                 }
 
                 // Get the product to update, and update its properties.
-                var product = _context.Products.FirstOrDefault(p => p.ProductId == productViewModel.ProductId);
+                var product = _context.Products.SingleOrDefault(p => p.ProductId == productViewModel.ProductId);
                 product.CategoryId = productViewModel.CategoryId;
                 product.ProductName = productViewModel.ProductName;
                 product.ProductDescription = productViewModel.ProductDescription;
@@ -232,14 +232,14 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
             string storageConnection1 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey1");
             string storageConnection2 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey2");
             string fileName = productImage.FileName;
-            string filepath = string.Empty;
+            string tempFilePath = string.Empty;
             string photoUrl;
 
             if (productImage != null && productImage.Length > 0)
             {
                 // Save the uploaded file on to a TEMP file.
-                filepath = Path.GetTempFileName();
-                using (var stream = System.IO.File.Create(filepath))
+                tempFilePath = Path.GetTempFileName();
+                using (var stream = System.IO.File.Create(tempFilePath))
                 {
                     productImage.CopyToAsync(stream).Wait();
                 }
@@ -255,14 +255,14 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
             BlobClient blobClient = blobContainerClient.GetBlobClient(fileName);
 
             // Open the file and upload its data
-            using (FileStream uploadFileStream = System.IO.File.OpenRead(filepath))
+            using (FileStream uploadFileStream = System.IO.File.OpenRead(tempFilePath))
             {
                 await blobClient.UploadAsync(uploadFileStream, overwrite: true);
                 uploadFileStream.Close();
             }
 
             // Delete the TEMP file since it is no longer needed.
-            System.IO.File.Delete(filepath);
+            System.IO.File.Delete(tempFilePath);
 
             // Return the URI of the item in the Blob Storage
             photoUrl = blobClient.Uri.ToString();
