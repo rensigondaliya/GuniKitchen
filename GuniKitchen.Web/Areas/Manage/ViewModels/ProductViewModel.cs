@@ -38,7 +38,6 @@ namespace GuniKitchen.Web.Areas.Manage.ViewModels
 
 
         [Display(Name = "Product Image")]
-        [Required(ErrorMessage = "Please select an image file to upload.")] 
         public IFormFile Photo { get; set; }
 
 

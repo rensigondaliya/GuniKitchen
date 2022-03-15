@@ -51,8 +51,10 @@ namespace GuniKitchen.Web.Models
         [StringLength(150)]
         public string ProductImageFileUrl { get; set; }
 
+
         [StringLength(60)]
         public string ProductImageContentType { get; set; }
+
 
         #region Navigational Properties to the Category Model
 

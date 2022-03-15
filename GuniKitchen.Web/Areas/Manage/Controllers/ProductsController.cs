@@ -23,18 +23,15 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
 
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
-        private readonly IWebHostEnvironment _environment;
         private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(
             ApplicationDbContext context,
             IConfiguration config,
-            IWebHostEnvironment environment,
             ILogger<ProductsController> logger)
         {
             _context = context;
             _config = config;
-            _environment = environment;
             _logger = logger;
         }
 
@@ -159,6 +156,7 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
                     photoUrl = await SavePhotoToBlobAsync(productViewModel.Photo);
                 }
 
+                // Get the product to update, and update its properties.
                 var product = _context.Products.FirstOrDefault(p => p.ProductId == productViewModel.ProductId);
                 product.CategoryId = productViewModel.CategoryId;
                 product.ProductName = productViewModel.ProductName;
@@ -166,8 +164,11 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
                 product.Price = productViewModel.Price;
                 product.UnitOfMeasure = productViewModel.UnitOfMeasure;
                 product.Size = productViewModel.Size;
-                product.ProductImageFileUrl = photoUrl;
-                product.ProductImageContentType = photoUrl == null ? null : productViewModel.Photo.ContentType;
+                if (photoUrl != null)
+                {
+                    product.ProductImageFileUrl = photoUrl;
+                    product.ProductImageContentType = productViewModel.Photo.ContentType;
+                }
 
                 try
                 {
@@ -231,9 +232,8 @@ namespace GuniKitchen.Web.Areas.Manage.Controllers
             string storageConnection1 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey1");
             string storageConnection2 = _config.GetValue<string>("MyAzureSettings:StorageAccountKey2");
             string fileName = productImage.FileName;
-            string fileType = productImage.ContentType;
             string filepath = string.Empty;
-            string photoUrl = string.Empty;
+            string photoUrl;
 
             if (productImage != null && productImage.Length > 0)
             {
