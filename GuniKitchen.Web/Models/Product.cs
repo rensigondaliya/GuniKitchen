@@ -1,5 +1,6 @@
 ﻿using GuniKitchen.Web.Models.Enums;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -62,6 +63,13 @@ namespace GuniKitchen.Web.Models
         public short CategoryId { get; set; }
 
         public Category Category { get; set; }
+
+        #endregion
+
+
+        #region Navigational Properties to the ShoppingCartItem Model
+
+        public ICollection<ShoppingCartItem> ShoppingCartItems { get; set; }
 
         #endregion
     }

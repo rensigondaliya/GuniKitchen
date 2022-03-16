@@ -42,10 +42,14 @@ namespace GuniKitchen.Web.Data
             builder.Entity<Product>()
                    .Property(e => e.Price)
                    .HasPrecision(precision: 6, scale: 2);
+            builder.Entity<ShoppingCartItem>()
+                   .Property(e => e.Price)
+                   .HasPrecision(precision: 6, scale: 2);
 
             builder.Entity<Product>()
                    .Property(e => e.Size)
                    .HasConversion(sizeConverter);
+
         }
 
     }

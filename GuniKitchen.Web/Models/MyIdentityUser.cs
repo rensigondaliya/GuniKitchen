@@ -1,6 +1,7 @@
 ﻿using GuniKitchen.Web.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -34,5 +35,11 @@ namespace GuniKitchen.Web.Models
         [PersonalData]
         public MyIdentityGenders Gender { get; set; }
 
+
+        #region Navigation Properties to the ShoppingCart model
+
+        public ICollection<ShoppingCartItem> ShoppingCartItems { get; set; }
+
+        #endregion
     }
 }
